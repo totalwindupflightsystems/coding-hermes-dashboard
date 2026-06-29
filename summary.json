@@ -1,0 +1,79 @@
+{
+  "updated": "2026-06-28T18:30:00-05:00",
+  "range_days": 7,
+  "projects": {
+    "helios-work": {"pass":124,"total":142,"runs_today":17,"commits":38,"cost_today":0.47,"avg_duration":192},
+    "gitreins-poc": {"pass":38,"total":38,"runs_today":12,"commits":19,"cost_today":0.23,"avg_duration":108},
+    "dexdat-core":  {"pass":89,"total":95,"runs_today":22,"commits":45,"cost_today":1.12,"avg_duration":245},
+    "dexdat-memory":{"pass":52,"total":55,"runs_today":8,"commits":14,"cost_today":0.18,"avg_duration":156},
+    "muster":       {"pass":31,"total":33,"runs_today":4,"commits":8,"cost_today":0.09,"avg_duration":134},
+    "musterflow":   {"pass":28,"total":29,"runs_today":6,"commits":11,"cost_today":0.14,"avg_duration":118},
+    "helix":        {"pass":64,"total":64,"runs_today":10,"commits":22,"cost_today":0.21,"avg_duration":87},
+    "warpfs":       {"pass":46,"total":48,"runs_today":14,"commits":31,"cost_today":0.35,"avg_duration":172},
+    "asce":         {"pass":0,"total":0,"runs_today":0,"commits":0,"cost_today":0,"avg_duration":0},
+    "ai-plays-poke": {"pass":18,"total":22,"runs_today":5,"commits":9,"cost_today":0.11,"avg_duration":210},
+    "kobayashi-maru":{"pass":12,"total":15,"runs_today":3,"commits":5,"cost_today":0.06,"avg_duration":95},
+    "bunker":        {"pass":11,"total":11,"runs_today":18,"commits":42,"cost_today":2.80,"avg_duration":320},
+    "h4f-infra":     {"pass":8,"total":8,"runs_today":4,"commits":6,"cost_today":0.12,"avg_duration":145}
+  },
+  "runs_daily": [
+    {"date":"06-22","counts":{"helios-work":18,"gitreins-poc":10,"dexdat-core":20,"dexdat-memory":7,"muster":4,"musterflow":5,"helix":9,"warpfs":12,"ai-plays-poke":4,"kobayashi-maru":2,"bunker":0,"h4f-infra":2}},
+    {"date":"06-23","counts":{"helios-work":20,"gitreins-poc":12,"dexdat-core":22,"dexdat-memory":8,"muster":5,"musterflow":6,"helix":10,"warpfs":14,"ai-plays-poke":5,"kobayashi-maru":3,"bunker":0,"h4f-infra":2}},
+    {"date":"06-24","counts":{"helios-work":22,"gitreins-poc":14,"dexdat-core":24,"dexdat-memory":9,"muster":6,"musterflow":7,"helix":11,"warpfs":15,"ai-plays-poke":6,"kobayashi-maru":3,"bunker":0,"h4f-infra":3}},
+    {"date":"06-25","counts":{"helios-work":19,"gitreins-poc":11,"dexdat-core":21,"dexdat-memory":8,"muster":5,"musterflow":6,"helix":10,"warpfs":13,"ai-plays-poke":5,"kobayashi-maru":2,"bunker":0,"h4f-infra":2}},
+    {"date":"06-26","counts":{"helios-work":21,"gitreins-poc":13,"dexdat-core":23,"dexdat-memory":9,"muster":6,"musterflow":7,"helix":11,"warpfs":14,"ai-plays-poke":6,"kobayashi-maru":3,"bunker":0,"h4f-infra":3}},
+    {"date":"06-27","counts":{"helios-work":17,"gitreins-poc":10,"dexdat-core":19,"dexdat-memory":7,"muster":4,"musterflow":5,"helix":9,"warpfs":11,"ai-plays-poke":4,"kobayashi-maru":2,"bunker":0,"h4f-infra":2}},
+    {"date":"06-28","counts":{"helios-work":17,"gitreins-poc":12,"dexdat-core":22,"dexdat-memory":8,"muster":4,"musterflow":6,"helix":10,"warpfs":14,"ai-plays-poke":5,"kobayashi-maru":3,"bunker":18,"h4f-infra":4}}
+  ],
+  "model_distribution": {
+    "glm-5.2": 245,
+    "deepseek-v4-pro": 142,
+    "deepseek-v4-flash": 198,
+    "MiniMax-M3": 67,
+    "kimi-for-coding": 42
+  },
+  "token_daily": [
+    {"date":"06-22","tokens_in":184000,"tokens_out":52000},
+    {"date":"06-23","tokens_in":212000,"tokens_out":61000},
+    {"date":"06-24","tokens_in":248000,"tokens_out":74000},
+    {"date":"06-25","tokens_in":195000,"tokens_out":55000},
+    {"date":"06-26","tokens_in":224000,"tokens_out":67000},
+    {"date":"06-27","tokens_in":189000,"tokens_out":53000},
+    {"date":"06-28","tokens_in":310000,"tokens_out":98000}
+  ],
+  "commits_daily": [
+    {"date":"06-22","counts":{"helios-work":5,"gitreins-poc":3,"dexdat-core":6,"dexdat-memory":2,"muster":1,"musterflow":2,"helix":3,"warpfs":4,"ai-plays-poke":1,"kobayashi-maru":1,"bunker":0,"h4f-infra":1}},
+    {"date":"06-23","counts":{"helios-work":6,"gitreins-poc":4,"dexdat-core":8,"dexdat-memory":3,"muster":2,"musterflow":2,"helix":4,"warpfs":5,"ai-plays-poke":2,"kobayashi-maru":1,"bunker":0,"h4f-infra":1}},
+    {"date":"06-24","counts":{"helios-work":7,"gitreins-poc":4,"dexdat-core":9,"dexdat-memory":3,"muster":2,"musterflow":3,"helix":4,"warpfs":6,"ai-plays-poke":2,"kobayashi-maru":1,"bunker":0,"h4f-infra":2}},
+    {"date":"06-25","counts":{"helios-work":5,"gitreins-poc":3,"dexdat-core":7,"dexdat-memory":2,"muster":1,"musterflow":2,"helix":3,"warpfs":5,"ai-plays-poke":2,"kobayashi-maru":1,"bunker":0,"h4f-infra":1}},
+    {"date":"06-26","counts":{"helios-work":6,"gitreins-poc":3,"dexdat-core":8,"dexdat-memory":2,"muster":1,"musterflow":2,"helix":4,"warpfs":5,"ai-plays-poke":1,"kobayashi-maru":1,"bunker":0,"h4f-infra":1}},
+    {"date":"06-27","counts":{"helios-work":5,"gitreins-poc":2,"dexdat-core":6,"dexdat-memory":1,"muster":1,"musterflow":1,"helix":3,"warpfs":4,"ai-plays-poke":1,"kobayashi-maru":0,"bunker":0,"h4f-infra":1}},
+    {"date":"06-28","counts":{"helios-work":4,"gitreins-poc":2,"dexdat-core":5,"dexdat-memory":1,"muster":0,"musterflow":1,"helix":2,"warpfs":3,"ai-plays-poke":0,"kobayashi-maru":0,"bunker":42,"h4f-infra":1}}
+  ],
+  "lines_daily": [
+    {"date":"06-22","added":1240,"removed":340},
+    {"date":"06-23","added":1580,"removed":520},
+    {"date":"06-24","added":2100,"removed":890},
+    {"date":"06-25","added":1450,"removed":420},
+    {"date":"06-26","added":1720,"removed":610},
+    {"date":"06-27","added":980,"removed":280},
+    {"date":"06-28","added":3420,"removed":120}
+  ],
+  "hotspots": [
+    {"path":"internal/auth/anonymous_middleware.go","project":"helios-work","changes":14,"growth":340},
+    {"path":"internal/server/bunkerd.go","project":"bunker","changes":12,"growth":890},
+    {"path":"pkg/retrieval/sqlite_search.go","project":"dexdat-core","changes":11,"growth":220},
+    {"path":"src/core/emulator.py","project":"ai-plays-poke","changes":10,"growth":-45},
+    {"path":"internal/agent/spawn.go","project":"bunker","changes":9,"growth":420},
+    {"path":"cmd/bunker/main.go","project":"bunker","changes":9,"growth":180},
+    {"path":"internal/network/tailscale.go","project":"bunker","changes":8,"growth":310},
+    {"path":"pkg/graph/discover.rs","project":"warpfs","changes":8,"growth":150},
+    {"path":"internal/api/handlers/agent.go","project":"helios-work","changes":7,"growth":-80},
+    {"path":"tests/test_game_loop.py","project":"ai-plays-poke","changes":7,"growth":560},
+    {"path":"internal/auth/jwt_interceptor.go","project":"bunker","changes":7,"growth":90},
+    {"path":"pkg/fuse/ops.rs","project":"warpfs","changes":6,"growth":240},
+    {"path":"internal/cli/connect.go","project":"bunker","changes":6,"growth":110},
+    {"path":"tests/conftest.py","project":"ai-plays-poke","changes":6,"growth":40},
+    {"path":"pkg/classifier/language.rs","project":"warpfs","changes":5,"growth":-30}
+  ]
+}

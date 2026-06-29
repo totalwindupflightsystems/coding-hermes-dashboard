@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coding Hermes Analytics</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: #0d1117;
+  --card: #161b22;
+  --border: #30363d;
+  --text: #c9d1d9;
+  --muted: #8b949e;
+  --green: #3fb950;
+  --red: #f85149;
+  --yellow: #d29922;
+  --blue: #58a6ff;
+  --purple: #bc8cff;
+  --orange: #f78166;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; }
+header { background:var(--card); border-bottom:1px solid var(--border); padding:16px 24px; display:flex; justify-content:space-between; align-items:center; }
+header h1 { font-size:20px; font-weight:600; }
+header .updated { color:var(--muted); font-size:12px; }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px; padding:24px; }
+.card { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:16px; }
+.card h3 { font-size:13px; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px; }
+.card .value { font-size:24px; font-weight:700; }
+.card .sub { font-size:12px; color:var(--muted); margin-top:4px; }
+.section { padding:0 24px 24px; }
+.section h2 { font-size:16px; margin-bottom:12px; color:var(--muted); border-bottom:1px solid var(--border); padding-bottom:8px; }
+.chart-wrap { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:16px; }
+.chart-wrap canvas { max-height:300px; }
+.row { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
+.row-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:12px; }
+table { width:100%; border-collapse:collapse; font-size:13px; }
+th, td { padding:8px 12px; text-align:left; border-bottom:1px solid var(--border); }
+th { color:var(--muted); font-weight:500; }
+.pass { color:var(--green); }
+.fail { color:var(--red); }
+.warn { color:var(--yellow); }
+.pulse { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; }
+.pulse.green { background:var(--green); }
+.pulse.red { background:var(--red); }
+.pulse.yellow { background:var(--yellow); }
+footer { text-align:center; padding:24px; color:var(--muted); font-size:11px; }
+@media(max-width:768px) { .row,.row-3 { grid-template-columns:1fr; } .grid { grid-template-columns:1fr 1fr; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>🛠️ Coding Hermes Analytics</h1>
+  <span class="updated" id="updated">loading...</span>
+</header>
+
+<section class="grid" id="health"></section>
+
+<section class="section"><h2>Runs Per Day</h2><div class="chart-wrap"><canvas id="runsChart"></canvas></div></section>
+
+<section class="section"><div class="row">
+  <div class="chart-wrap"><h2 style="margin-bottom:8px">Model Distribution</h2><canvas id="modelChart"></canvas></div>
+  <div class="chart-wrap"><h2 style="margin-bottom:8px">Token Burn Rate</h2><canvas id="tokenChart"></canvas></div>
+</div></section>
+
+<section class="section"><div class="row">
+  <div class="chart-wrap"><h2 style="margin-bottom:8px">Commit Velocity</h2><canvas id="commitChart"></canvas></div>
+  <div class="chart-wrap"><h2 style="margin-bottom:8px">Lines Changed</h2><canvas id="linesChart"></canvas></div>
+</div></section>
+
+<section class="section"><h2>Cost Tracker</h2><div class="chart-wrap"><div id="costTable"></div></div></section>
+
+<section class="section"><h2>File Hotspots (last 7 days)</h2><div class="chart-wrap"><div id="hotspots"></div></div></section>
+
+<footer>Coding Hermes Analytics · <span id="range">7-day</span> · Auto-refresh 60s</footer>
+
+<script>
+const COLORS = ['#58a6ff','#3fb950','#f78166','#bc8cff','#f85149','#d29922','#8b949e','#79c0ff','#a5d6ff','#56d364'];
+const MODEL_COLORS = {'glm-5.2':'#58a6ff','MiniMax-M3':'#f78166','deepseek-v4-pro':'#bc8cff','deepseek-v4-flash':'#8b949e','kimi-for-coding':'#3fb950'};
+
+let charts = {};
+
+async function load() {
+  const r = await fetch('summary.json');
+  return r.json();
+}
+
+function healthGrid(d) {
+  const h = document.getElementById('health');
+  h.innerHTML = '';
+  for (const [name,p] of Object.entries(d.projects)) {
+    const pct = p.total ? Math.round(p.pass / p.total * 100) : 100;
+    const color = pct >= 90 ? 'green' : pct >= 70 ? 'yellow' : 'red';
+    h.innerHTML += `<div class="card">
+      <h3>${name}</h3>
+      <div class="value" style="color:var(--${pct>=90?'green':pct>=70?'yellow':'red'})">${pct}%</div>
+      <div class="sub"><span class="pulse ${color}"></span>${p.pass}/${p.total} runs · ${p.commits || 0} commits · ~$${p.cost_today?.toFixed(2)||'0.00'} today</div>
+      <div class="sub">${p.runs_today || 0} runs today · avg ${p.avg_duration ? Math.round(p.avg_duration/60)+'m' : '--'}</div>
+    </div>`;
+  }
+}
+
+function makeChart(id, type, data, options) {
+  if (charts[id]) charts[id].destroy();
+  const ctx = document.getElementById(id).getContext('2d');
+  charts[id] = new Chart(ctx, {type, data, options});
+}
+
+function runsTimeline(d) {
+  const labels = d.runs_daily?.map(r=>r.date) || [];
+  const projects = [...new Set((d.runs_daily||[]).flatMap(r=>Object.keys(r.counts||{})))];
+  const datasets = projects.map((p,i) => ({
+    label:p, data:labels.map(dt=>(d.runs_daily?.find(r=>r.date===dt)?.counts||{})[p]||0),
+    backgroundColor:COLORS[i%COLORS.length], borderColor:COLORS[i%COLORS.length], borderWidth:1
+  }));
+  makeChart('runsChart','bar',{labels,datasets},{
+    responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{labels:{color:'#8b949e',font:{size:10}}}},
+    scales:{x:{ticks:{color:'#8b949e',font:{size:9}},grid:{color:'#21262d'}},y:{ticks:{color:'#8b949e',font:{size:9}},grid:{color:'#21262d'},beginAtZero:true}}
+  });
+}
+
+function modelDist(d) {
+  const models = d.model_distribution || {};
+  const labels = Object.keys(models);
+  const values = Object.values(models);
+  makeChart('modelChart','doughnut',{labels,datasets:[{data:values,backgroundColor:labels.map(m=>MODEL_COLORS[m]||'#8b949e')}]},{
+    responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{labels:{color:'#8b949e',font:{size:10}}}}
+  });
+}
+
+function tokenBurn(d) {
+  const labels = d.token_daily?.map(r=>r.date) || [];
+  makeChart('tokenChart','line',{labels,datasets:[
+    {label:'Input',data:labels.map(dt=>d.token_daily?.find(r=>r.date===dt)?.tokens_in||0),borderColor:'#58a6ff',tension:0.3,fill:false},
+    {label:'Output',data:labels.map(dt=>d.token_daily?.find(r=>r.date===dt)?.tokens_out||0),borderColor:'#3fb950',tension:0.3,fill:false}
+  ]},{
+    responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{labels:{color:'#8b949e',font:{size:10}}}},
+    scales:{x:{ticks:{color:'#8b949e',font:{size:9}},grid:{color:'#21262d'}},y:{ticks:{color:'#8b949e',font:{size:9},callback:v=>v>=1000?(v/1000)+'k':v},grid:{color:'#21262d'}}}
+  });
+}
+
+function commitVelocity(d) {
+  const labels = d.commits_daily?.map(r=>r.date) || [];
+  const projects = [...new Set((d.commits_daily||[]).flatMap(r=>Object.keys(r.counts||{})))];
+  const datasets = projects.map((p,i) => ({
+    label:p, data:labels.map(dt=>(d.commits_daily?.find(r=>r.date===dt)?.counts||{})[p]||0),
+    backgroundColor:COLORS[i%COLORS.length], borderColor:COLORS[i%COLORS.length], borderWidth:1
+  }));
+  makeChart('commitChart','bar',{labels,datasets},{
+    responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{labels:{color:'#8b949e',font:{size:10}}}},
+    scales:{x:{ticks:{color:'#8b949e',font:{size:9}},grid:{color:'#21262d'}},y:{ticks:{color:'#8b949e',font:{size:9}},grid:{color:'#21262d'},beginAtZero:true}}
+  });
+}
+
+function linesChanged(d) {
+  const labels = d.lines_daily?.map(r=>r.date) || [];
+  makeChart('linesChart','line',{labels,datasets:[
+    {label:'Added',data:labels.map(dt=>d.lines_daily?.find(r=>r.date===dt)?.added||0),borderColor:'#3fb950',backgroundColor:'rgba(63,185,80,0.1)',tension:0.3,fill:true},
+    {label:'Removed',data:labels.map(dt=>d.lines_daily?.find(r=>r.date===dt)?.removed||0),borderColor:'#f85149',backgroundColor:'rgba(248,81,73,0.1)',tension:0.3,fill:true}
+  ]},{
+    responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{labels:{color:'#8b949e',font:{size:10}}}},
+    scales:{x:{ticks:{color:'#8b949e',font:{size:9}},grid:{color:'#21262d'}},y:{ticks:{color:'#8b949e',font:{size:9}},grid:{color:'#21262d'}}}
+  });
+}
+
+function costTracker(d) {
+  const models = d.model_distribution || {};
+  const pricing = {'glm-5.2':{i:0.50,o:1.10},'MiniMax-M3':{i:0.30,o:1.20},'deepseek-v4-pro':{i:0.85,o:2.50},'deepseek-v4-flash':{i:0.14,o:0.42},'kimi-for-coding':{i:0.40,o:1.60}};
+  let rows = '';
+  let total = 0;
+  for (const [m,count] of Object.entries(models)) {
+    const p = pricing[m] || {i:0.5,o:1.0};
+    const estIn = count * 8000, estOut = count * 2000;
+    const cost = (estIn/1e6)*p.i + (estOut/1e6)*p.o;
+    total += cost;
+    rows += `<tr><td>${m}</td><td>$${p.i}/M in</td><td>$${p.o}/M out</td><td>${count} runs</td><td>~$${cost.toFixed(2)}</td></tr>`;
+  }
+  rows += `<tr style="font-weight:700"><td colspan=4>Total (estimated)</td><td>~$${total.toFixed(2)}</td></tr>`;
+  document.getElementById('costTable').innerHTML = `<table><tr><th>Model</th><th>Input $/1M</th><th>Output $/1M</th><th>Runs</th><th>Est. Cost</th></tr>${rows}</table>`;
+}
+
+function fileHotspots(d) {
+  const files = (d.hotspots || []).slice(0,20);
+  if (!files.length) { document.getElementById('hotspots').innerHTML='<span class="warn">No data yet</span>'; return; }
+  let rows = files.map(f => `<tr><td>${f.path}</td><td>${f.project}</td><td>${f.changes}</td><td class="${f.growth>0?'pass':'fail'}">${f.growth>0?'+':''}${f.growth}</td></tr>`).join('');
+  document.getElementById('hotspots').innerHTML = `<table><tr><th>File</th><th>Project</th><th>Changes</th><th>Net Lines</th></tr>${rows}</table>`;
+}
+
+(async () => {
+  const d = await load();
+  document.getElementById('updated').textContent = 'updated ' + (d.updated || '--');
+  document.getElementById('range').textContent = (d.range_days || 7) + '-day';
+  healthGrid(d);
+  runsTimeline(d);
+  modelDist(d);
+  tokenBurn(d);
+  commitVelocity(d);
+  linesChanged(d);
+  costTracker(d);
+  fileHotspots(d);
+  setTimeout(arguments.callee, 60000);
+})();
+</script>
+</body>
+</html>
