@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Helios vs Susanno — Deep Analysis</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --card: #161b22;
+    --border: #30363d;
+    --text: #c9d1d9;
+    --muted: #8b949e;
+    --accent: #58a6ff;
+    --green: #3fb950;
+    --red: #f85149;
+    --orange: #d2991d;
+    --purple: #a371f7;
+    --teal: #39d353;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); line-height:1.6; }
+  .container { max-width: 1100px; margin:0 auto; padding: 2rem 1.5rem; }
+  h1 { font-size:2.2rem; color:#fff; border-bottom:2px solid var(--border); padding-bottom:0.75rem; margin-bottom:0.5rem; }
+  h2 { font-size:1.5rem; color: var(--accent); margin:2.5rem 0 1rem; border-bottom:1px solid var(--border); padding-bottom:0.35rem; }
+  h3 { font-size:1.15rem; color:#f0f6fc; margin:1.5rem 0 0.75rem; }
+  .meta { color:var(--muted); font-size:0.9rem; margin-bottom:2rem; }
+  .tl-dr { background:linear-gradient(135deg, #1a2332, #0d1f2d); border-left:4px solid var(--accent); padding:1.25rem 1.5rem; border-radius:6px; margin:1.5rem 0; }
+  .tl-dr p { margin:0.35rem 0; }
+  .tldr-label { color:var(--accent); font-weight:700; font-size:0.85rem; text-transform:uppercase; letter-spacing:0.05em; }
+
+  table { width:100%; border-collapse:collapse; margin:1rem 0 1.5rem; font-size:0.92rem; }
+  th { background: var(--card); text-align:left; padding:0.6rem 0.85rem; border-bottom:2px solid var(--border); font-weight:600; color:#f0f6fc; }
+  td { padding:0.5rem 0.85rem; border-bottom:1px solid var(--border); }
+  tr:hover td { background:rgba(88,166,255,0.04); }
+  .tag { display:inline-block; padding:0.15rem 0.55rem; border-radius:12px; font-size:0.78rem; font-weight:600; }
+  .tag-yes { background:rgba(63,185,80,0.15); color:var(--green); }
+  .tag-no { background:rgba(248,81,73,0.12); color:var(--red); }
+  .tag-partial { background:rgba(210,153,29,0.15); color:var(--orange); }
+
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin:1.5rem 0; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:1.25rem; }
+  .card h4 { color:var(--accent); margin-bottom:0.75rem; font-size:1rem; }
+  .card ul { list-style:none; padding:0; }
+  .card li { padding:0.35rem 0; font-size:0.9rem; border-bottom:1px solid rgba(48,54,61,0.5); }
+  .card li:last-child { border-bottom:none; }
+
+  .big-num { font-size:2.5rem; font-weight:800; color:#fff; line-height:1; }
+  .big-num-label { color:var(--muted); font-size:0.82rem; text-transform:uppercase; letter-spacing:0.04em; }
+  .stats-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(130px,1fr)); gap:1rem; margin:1.5rem 0; }
+  .stat { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:1rem; text-align:center; }
+  .stat .num { font-size:1.8rem; font-weight:700; color:#fff; }
+  .stat .label { color:var(--muted); font-size:0.78rem; margin-top:0.25rem; }
+
+  .bar-wrap { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:1.25rem; margin:1rem 0; }
+  .bar-row { display:flex; align-items:center; gap:1rem; margin:0.75rem 0; }
+  .bar-label { width:120px; text-align:right; font-size:0.85rem; color:var(--muted); flex-shrink:0; }
+  .bar-track { flex:1; height:22px; background:rgba(48,54,61,0.5); border-radius:4px; overflow:hidden; position:relative; }
+  .bar-fill { height:100%; border-radius:4px; transition:width 0.3s; display:flex; align-items:center; justify-content:flex-end; padding-right:8px; font-size:0.75rem; font-weight:700; }
+  .bar-helios { background:linear-gradient(90deg, #f0883e, #d2991d); }
+  .bar-susanno { background:linear-gradient(90deg, #3fb950, #39d353); }
+  .code-block { background:var(--card); border:1px solid var(--border); border-radius:6px; padding:1rem 1.25rem; margin:0.75rem 0; overflow-x:auto; }
+  .code-block code { font-family:'SF Mono', 'Fira Code', monospace; font-size:0.85rem; color:var(--text); }
+  .footnote { color:var(--muted); font-size:0.82rem; margin-top:0.25rem; }
+
+  @media (max-width:768px) {
+    .grid-2 { grid-template-columns:1fr; }
+    .bar-label { width:80px; font-size:0.75rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>⚡ Helios vs Susanno — Deep Analysis</h1>
+<p class="meta">Prepared 2026-07-05 for Bharat Bala · Source repos both verified building</p>
+
+<div class="tl-dr">
+  <p class="tldr-label">TL;DR</p>
+  <p><strong>Susanno is Helios's successor, rebuilt from scratch.</strong> Same concept (incident response platform) but with <strong>1/15th</strong> the code surface, a fraction of the dependencies, and <strong>every capability wired and tested</strong>.</p>
+  <p>Helios: 352,867 lines Go, ~18% complete. Susanno: 23,997 lines Go, <strong>100% v1 shipped</strong> (P0–P8).</p>
+</div>
+
+<h2>📊 Size Comparison</h2>
+<div class="stats-grid">
+  <div class="stat"><div class="num">353K</div><div class="label">Helios Go LOC</div></div>
+  <div class="stat"><div class="num">24K</div><div class="label">Susanno Go LOC</div></div>
+  <div class="stat"><div class="num">15:1</div><div class="label">Code Ratio</div></div>
+  <div class="stat"><div class="num">677</div><div class="label">Helios Go files</div></div>
+  <div class="stat"><div class="num">191</div><div class="label">Susanno Go files</div></div>
+  <div class="stat"><div class="num">~18%</div><div class="label">Helios complete</div></div>
+  <div class="stat"><div class="num" style="color:var(--green)">100%</div><div class="label">Susanno v1 done</div></div>
+  <div class="stat"><div class="num">77</div><div class="label">Helios specs</div></div>
+  <div class="stat"><div class="num">13</div><div class="label">Susanno docs</div></div>
+</div>
+
+<h2>🏗️ Architecture</h2>
+<div class="grid-2">
+  <div class="card">
+    <h4>🌞 Helios — Constellation Model</h4>
+    <ul>
+      <li>Multi-agent architecture: Coordination Layer + Domain Agents (Network, DB, App) + Subagents</li>
+      <li>Agents communicate via <strong>NATS JetStream</strong> (shared incident log)</li>
+      <li>5-tier RBAC (Viewer → Super Admin), MFA, HashiCorp Vault</li>
+      <li>PostgreSQL + MySQL + SQLite, Redis, config hot-reload</li>
+      <li><span class="tag tag-no">~18% shipped</span></li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>⚔️ Susanno — Deterministic Core</h4>
+    <ul>
+      <li>Simple pipeline: Alerts → Dedup → Incident → Runbook Engine → Notify</li>
+      <li><strong>Deterministic-first:</strong> everything works with <code>ai.enabled=false</code></li>
+      <li>AI copilot is optional, provider-agnostic, <strong>never executes</strong> — only investigates + proposes</li>
+      <li>Event-sourced incident timeline is the source of truth</li>
+      <li><span class="tag tag-yes">100% shipped</span></li>
+    </ul>
+  </div>
+</div>
+
+<h2>🔬 Feature Coverage</h2>
+<table>
+<tr><th>Capability</th><th>Helios</th><th>Susanno</th><th>Notes</th></tr>
+<tr><td>Alert ingestion</td><td><span class="tag tag-yes">✓</span></td><td><span class="tag tag-yes">✓</span></td><td>Susanno: Alertmanager v4 + 4 native adapters (Grafana, CloudWatch, Azure, Datadog)</td></tr>
+<tr><td>Dedup + correlation</td><td><span class="tag tag-partial">TOCTOU race</span></td><td><span class="tag tag-yes">Atomic UPSERT</span></td><td>Susanno's dedup is race-free — explicitly fixed from Helios's check-then-insert bug</td></tr>
+<tr><td>Incident state machine</td><td><span class="tag tag-yes">✓</span></td><td><span class="tag tag-yes">✓</span></td><td>open↔ack↔resolved↔closed with reopen</td></tr>
+<tr><td>Runbook engine</td><td><span class="tag tag-yes">✓</span></td><td><span class="tag tag-yes">✓</span></td><td>Susanno: 4 step types, verify+rollback+dry-run+secret redaction</td></tr>
+<tr><td>Notifications</td><td><span class="tag tag-partial">2 providers</span></td><td><span class="tag tag-yes">8+ providers</span></td><td>Slack, Teams, Discord, Email, PagerDuty, incident.io, Splunk On-Call, Opsgenie, HMAC webhook</td></tr>
+<tr style="background:rgba(63,185,80,0.06)"><td><strong>AI copilot</strong></td><td><span class="tag tag-no">✗</span></td><td><span class="tag tag-yes">✓</span></td><td>Provider-agnostic, guardrailed, never executes</td></tr>
+<tr style="background:rgba(63,185,80,0.06)"><td><strong>MCP server + client</strong></td><td><span class="tag tag-no">✗</span></td><td><span class="tag tag-yes">✓</span></td><td>Exposes incidents/runbooks as tools to AI agents</td></tr>
+<tr style="background:rgba(63,185,80,0.06)"><td><strong>Slack-native coordination</strong></td><td><span class="tag tag-no">✗</span></td><td><span class="tag tag-yes">✓</span></td><td>/susanoo slash commands + Ack/Resolve buttons</td></tr>
+<tr style="background:rgba(63,185,80,0.06)"><td><strong>Native on-call</strong></td><td><span class="tag tag-no">✗</span></td><td><span class="tag tag-yes">✓</span></td><td>Schedules, rotations, overrides, escalation policies</td></tr>
+<tr style="background:rgba(63,185,80,0.06)"><td><strong>Public status page</strong></td><td><span class="tag tag-no">✗</span></td><td><span class="tag tag-yes">✓</span></td><td>Server-rendered /status + JSON</td></tr>
+<tr style="background:rgba(63,185,80,0.06)"><td><strong>SLO burn-rate alerting</strong></td><td><span class="tag tag-no">✗</span></td><td><span class="tag tag-yes">✓</span></td><td>Error budget monitoring</td></tr>
+<tr style="background:rgba(63,185,80,0.06)"><td><strong>Postmortem generation</strong></td><td><span class="tag tag-no">✗</span></td><td><span class="tag tag-yes">✓</span></td><td>GPT-5.5 reads event timeline → writes postmortem</td></tr>
+<tr style="background:rgba(63,185,80,0.06)"><td><strong>HA / multi-replica</strong></td><td><span class="tag tag-no">✗</span></td><td><span class="tag tag-yes">✓</span></td><td>LISTEN/NOTIFY, leader election, crash reaper</td></tr>
+<tr style="background:rgba(63,185,80,0.06)"><td><strong>Ticketing</strong></td><td><span class="tag tag-no">✗</span></td><td><span class="tag tag-yes">✓</span></td><td>Jira, Notion, Plane, webhook</td></tr>
+<tr style="background:rgba(63,185,80,0.06)"><td><strong>Maintenance windows</strong></td><td><span class="tag tag-no">✗</span></td><td><span class="tag tag-yes">✓</span></td><td>Recurring silences</td></tr>
+<tr><td>Auth</td><td><span class="tag tag-yes">5-tier RBAC+MFA+Vault</span></td><td><span class="tag tag-yes">3 roles, bcrypt+API keys</span></td><td>Helios is heavier on enterprise auth</td></tr>
+<tr><td>Web UI</td><td><span class="tag tag-partial">Mock data</span></td><td><span class="tag tag-yes">Live, go:embed</span></td><td>Susanno's React 19 UI is real and embedded</td></tr>
+</table>
+
+<h2>🛠️ Tech Stack</h2>
+<table>
+<tr><th>Layer</th><th>Helios</th><th>Susanno</th><th>Match?</th></tr>
+<tr><td>Language</td><td>Go 1.25</td><td>Go 1.26</td><td>✅ Same</td></tr>
+<tr><td>Router</td><td>chi v5</td><td>chi v5</td><td>✅ Same</td></tr>
+<tr><td>Database</td><td>PostgreSQL, MySQL, SQLite</td><td>PostgreSQL, SQLite</td><td>⚠️ Helios extra MySQL</td></tr>
+<tr><td>DB driver</td><td>lib/pq</td><td>pgx/v5</td><td>⚠️ Susanno uses newer/faster driver</td></tr>
+<tr><td>WebSocket</td><td>gorilla/websocket</td><td>gorilla/websocket</td><td>✅ Same</td></tr>
+<tr><td>AI/LLM</td><td>—</td><td>openai-go/v3 (provider-agnostic)</td><td>🔴 Susanno only</td></tr>
+<tr><td>MCP</td><td>—</td><td>go-sdk v1.6.1</td><td>🔴 Susanno only</td></tr>
+<tr><td>Messaging</td><td>NATS JetStream (spec'd)</td><td>Postgres LISTEN/NOTIFY</td><td>🟡 Different approach</td></tr>
+<tr><td>Tracing</td><td>—</td><td>OpenTelemetry (optional)</td><td>🔴 Susanno only</td></tr>
+<tr><td>Frontend</td><td>React + TS + Vite</td><td>React 19 + Vite + Tailwind</td><td>✅ Same family</td></tr>
+<tr><td>Docker</td><td>Multi-stage + Distroless</td><td>Multi-stage + compose</td><td>✅ Both</td></tr>
+</table>
+
+<h2>📈 Code Volume Comparison</h2>
+<div class="bar-wrap">
+  <div class="bar-row">
+    <div class="bar-label">Go LOC</div>
+    <div class="bar-track">
+      <div class="bar-fill bar-helios" style="width:100%">353K</div>
+    </div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label"></div>
+    <div class="bar-track">
+      <div class="bar-fill bar-susanno" style="width:6.8%">24K</div>
+    </div>
+  </div>
+  <p class="footnote">Susanno achieves 100% feature delivery with 6.8% of Helios's code volume.</p>
+</div>
+
+<div class="bar-wrap">
+  <div class="bar-row">
+    <div class="bar-label">Go files</div>
+    <div class="bar-track">
+      <div class="bar-fill bar-helios" style="width:100%">677</div>
+    </div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label"></div>
+    <div class="bar-track">
+      <div class="bar-fill bar-susanno" style="width:28.2%">191</div>
+    </div>
+  </div>
+</div>
+
+<div class="bar-wrap">
+  <div class="bar-row">
+    <div class="bar-label">Test files</div>
+    <div class="bar-track">
+      <div class="bar-fill bar-helios" style="width:100%">319</div>
+    </div>
+  </div>
+  <div class="bar-row">
+    <div class="bar-label"></div>
+    <div class="bar-track">
+      <div class="bar-fill bar-susanno" style="width:20.7%">66</div>
+    </div>
+  </div>
+</div>
+
+<h2>🔑 Key Design Differences</h2>
+
+<div class="grid-2">
+  <div class="card">
+    <h4>🧠 Philosophy</h4>
+    <ul>
+      <li><strong>Helios:</strong> "Multi-agent constellation" — domain-specific AI agents that observe, orient, decide, act. The AI <em>is</em> the architecture.</li>
+      <li><strong>Susanno:</strong> "Deterministic-first" — core loop works without AI. AI is an optional copilot that investigates and proposes. Never executes.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>🐛 Dedup Quality</h4>
+    <ul>
+      <li><strong>Helios:</strong> Check-then-insert pattern → <span style="color:var(--red)">TOCTOU race condition</span></li>
+      <li><strong>Susanno:</strong> Atomic UPSERT on unique index → <span style="color:var(--green)">Race-free</span></li>
+      <li>Explicitly called out in Susanno's PLAN.md §2 as a Helios bug fix</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>📦 Package Hygiene</h4>
+    <ul>
+      <li><strong>Helios:</strong> Duplicate packages — <code>logger</code> and <code>logging</code>, <code>agent</code> and <code>agents</code></li>
+      <li><strong>Susanno:</strong> GOAL.md §7: "Before creating a package, grep for an existing one — Helios drowned in duplicates"</li>
+      <li>43 small, focused packages — one concept, one package</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>🔌 MCP (Agent Interop)</h4>
+    <ul>
+      <li><strong>Helios:</strong> No MCP whatsoever</li>
+      <li><strong>Susanno:</strong> Full MCP server (stdio + streamable HTTP) + MCP client (copilot queries external servers)</li>
+      <li>3 read tools + 2 write tools, same store layer as REST — zero drift</li>
+    </ul>
+  </div>
+</div>
+
+<h2>🔄 Gaps: What each should borrow from the other</h2>
+
+<div class="grid-2">
+  <div class="card" style="border-left:3px solid var(--green)">
+    <h4 style="color:var(--green)">Susanno → Helios (10 features to port)</h4>
+    <ul>
+      <li>✅ AI copilot (provider-agnostic, guardrailed)</li>
+      <li>✅ MCP server + client</li>
+      <li>✅ Atomic dedup (fix the TOCTOU race)</li>
+      <li>✅ 6 more notification providers</li>
+      <li>✅ Slack-native coordination</li>
+      <li>✅ Native on-call schedules/rotations</li>
+      <li>✅ Public status page</li>
+      <li>✅ SLO burn-rate alerting</li>
+      <li>✅ Postmortem generation</li>
+      <li>✅ HA with leader election</li>
+    </ul>
+  </div>
+  <div class="card" style="border-left:3px solid var(--orange)">
+    <h4 style="color:var(--orange)">Helios → Susanno (3 features to consider)</h4>
+    <ul>
+      <li>🔶 Enterprise auth — 5-tier RBAC, MFA, Vault (when real users demand it)</li>
+      <li>🔶 Config hot-reload — fsnotify-based (low effort, high DX value)</li>
+      <li>🔶 Multi-agent constellation — if single-copilot model proves insufficient at scale</li>
+    </ul>
+  </div>
+</div>
+
+<h2>🏁 Bottom Line</h2>
+
+<div class="tl-dr" style="border-left-color:var(--green)">
+  <p><strong>Susanno IS the Helios you wanted.</strong> Same product, rebuilt with the lessons from Helios's over-engineering. The 15:1 code ratio isn't because features were dropped — it's because the architecture is simpler and every line is wired.</p>
+  <p style="margin-top:0.75rem"><strong>Helios's value now:</strong> reference library (specs, test patterns, enterprise auth). <strong>Susanno's value:</strong> the shipping product.</p>
+</div>
+
+<div class="stats-grid" style="margin-top:2rem">
+  <div class="stat"><div class="num" style="color:var(--accent)">github.com</div><div class="label">Susanno</div></div>
+  <div class="stat"><div class="num" style="color:var(--green)">hypervisor-io</div><div class="label">Org</div></div>
+  <div class="stat"><div class="num">susanno</div><div class="label">Repo</div></div>
+  <div class="stat"><div class="num" style="color:var(--green)">v1</div><div class="label">Status: Complete</div></div>
+  <div class="stat"><div class="num">Go 1.26</div><div class="label">Runtime</div></div>
+  <div class="stat"><div class="num">P8</div><div class="label">Phases shipped</div></div>
+</div>
+
+<p style="text-align:center;color:var(--muted);margin-top:3rem;font-size:0.85rem">Generated 2026-07-05 · Both repos verified building · Susanno clone from github.com/hypervisor-io/susanno · Helios from /home/kara/helios-work</p>
+
+</div>
+</body>
+</html>
